@@ -3,5 +3,3 @@ Prova de conceito
 
 ## Rodar a aplicação:
 mvn spring-boot:run
-
-teste diogo
