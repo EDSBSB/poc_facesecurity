@@ -29,3 +29,7 @@ hs_err_pid*
 .target/
 *target
 
+.idea/
+poc_facesecurity.iml
+
+*.DS_Store
