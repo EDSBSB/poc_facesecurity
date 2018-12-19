@@ -17,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public class CadastroProcurado {
 
-	private final static String UPLOADED_FOLDER = "fotos/";
+	private final static String UPLOADED_FOLDER = "foto/";
 	
 	JdbcTemplate jdbcTemplate;
 	public CadastroProcurado(JdbcTemplate jt) {
@@ -41,7 +41,7 @@ public class CadastroProcurado {
 			JSONObject json = new JSONObject();
 			json.put("nome", nome);
 			json.put("identificador", identificador );
-			json.put("foto", file.getOriginalFilename() );
+			json.put("foto", filePath + identificador + "_" +file.getOriginalFilename() );
 
 			String sql = "insert into conteiner (tipo, dado) values (?, ?::json)";
 			
