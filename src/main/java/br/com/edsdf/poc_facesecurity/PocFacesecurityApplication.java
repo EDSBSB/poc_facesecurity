@@ -1,5 +1,13 @@
 package br.com.edsdf.poc_facesecurity;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -8,6 +16,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,6 +57,28 @@ public class PocFacesecurityApplication {
             return "Informe o arquivo";
         }
         return new CadastroProcurado(jdbcTemplate).cadastro(nome, identificador, file );
+    }
+    
+    @PostMapping("/uploadAndStartMatch")
+    public String uploadAndStartMatch( @RequestParam("file") MultipartFile file) {
+    	
+        if (file.isEmpty()) {
+            return "Informe o arquivo";
+        }
+        //return new CadastroProcurado(jdbcTemplate).cadastro(nome, identificador, file );
+        
+        return "Falta implementar a chamanda assincrona ao findface";
+    }
+    
+    @RequestMapping(value = "/procurado/foto", method = RequestMethod.GET)
+    public void getImageAsByteArray(@RequestParam("id") String id, HttpServletResponse response) throws IOException {
+    	
+    	String pathImagem = new CadastroProcurado(jdbcTemplate).buscaImagem(id );
+    	
+    	InputStream in = new FileInputStream( new File(pathImagem));
+//        InputStream in = servletContext.getResourceAsStream("/WEB-INF/images/image-example.jpg");
+//        response.setContentType(MediaType.ima);
+        IOUtils.copy(in, response.getOutputStream());
     }
 }
 

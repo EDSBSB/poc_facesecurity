@@ -53,10 +53,10 @@ function carrega(){
 			cell2.innerHTML = dado[i].identificador;
 			cell3.innerHTML = " ???? ";
 			cell4.innerHTML = "<div class='avatar-group'>\n" + 
-			"    <a href='#' class='avatar avatar-sm' data-toggle='tooltip'\n" + 
-			"        data-original-title='Ryan Tompson'> <img\n" + 
+			"    <a href='#' class='avatar avatar-sm' data-toggle='tooltip'\n" + " onclick='return showImagem(\""+dado[i].identificador+"\");' \n"+
+			"        data-original-title='Ryan Tompsonnnnnnn1'> <img\n" + 
 			"        alt='Image placeholder'\n" + 
-			"        src='../assets/img/theme/team-1-800x800.jpg'\n" + 
+			"        src='/procurado/foto?id="+dado[i].identificador+"'\n" +
 			"        class='rounded-circle'>\n" + 
 			"    </a>\n" + 
 			"</div>";
@@ -64,4 +64,10 @@ function carrega(){
 		}
 		
 	}, "json");
+}
+function showImagem(id){
+	console.log('xxx: '+ id);
+	console.log( $('#fotoId').src );
+	$('#fotoId').attr('src', "/procurado/foto?id="+id);
+	$('#myModal').modal('toggle');
 }

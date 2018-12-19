@@ -68,4 +68,12 @@ public class CadastroProcurado {
 		return "["+ret+"]" ;
 	}
 
+
+	public String buscaImagem(String id) {
+		String sql = "select dado ->> 'foto' foto from conteiner where dado ->> 'identificador' = ? ";
+		
+		return jdbcTemplate.queryForObject(sql, new Object[] {id}, String.class);
+		
+	}
+
 }
