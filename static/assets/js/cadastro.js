@@ -4,20 +4,34 @@ function incluirProcurado(){
 	console.log('>>>>>>>>>>>.');
 	
 	var fl = $('#file')[0];
-	var identificador = $('#identificador').val();
-	var nome = $('#nome').val();
+	var cpf = $('#cpf').val();
     
     var formData = new FormData();
-    formData.append('nome', nome);
-    formData.append('identificador', identificador); 
+    formData.append('cpf', cpf); 
     formData.append('file', fl.files[0]);
 
     $.ajax({
         url: '/upload', //window.location.pathname,
         type: 'POST',
+        dataType: "json",
         data: formData,
-        success: function(data) {
-            alert(data)
+        success: function(dado) {
+        	console.log( dado );
+        	if( dado.sucess == false){
+        		toast( dado.msg)
+        	}else{
+        		var msg = "Sucesso";
+        		if( dado.Result.length > 0 ){
+        			var pessoa = dado.Result[0].BasicData;
+        			msg = "";
+        			for(var x in pessoa){
+        				msg += x+": "+pessoa[x]+"</br>";
+        			}
+        		}else{
+        			msg = 'problema';
+        		}
+        		toast( msg );
+        	}
         },
         cache: false,
         contentType: false,
@@ -50,13 +64,13 @@ function carrega(){
 			var cell4 = row.insertCell(3);
 	
 			cell1.innerHTML = dado[i].nome;
-			cell2.innerHTML = dado[i].identificador;
+			cell2.innerHTML = mascaraCpf(dado[i].cpf);
 			cell3.innerHTML = " ???? ";
 			cell4.innerHTML = "<div class='avatar-group'>\n" + 
-			"    <a href='#' class='avatar avatar-sm' data-toggle='tooltip'\n" + " onclick='return showImagem(\""+dado[i].identificador+"\");' \n"+
+			"    <a href='#' class='avatar avatar-sm' data-toggle='tooltip'\n" + " onclick='return showImagem(\""+dado[i].cpf+"\");' \n"+
 			"        data-original-title='Ryan Tompsonnnnnnn1'> <img\n" + 
 			"        alt='Image placeholder'\n" + 
-			"        src='/procurado/foto?id="+dado[i].identificador+"'\n" +
+			"        src='/procurado/foto?id="+ dado[i].cpf+"'\n" +
 			"        class='rounded-circle'>\n" + 
 			"    </a>\n" + 
 			"</div>";
@@ -70,4 +84,7 @@ function showImagem(id){
 	console.log( $('#fotoId').src );
 	$('#fotoId').attr('src', "/procurado/foto?id="+id);
 	$('#myModal').modal('toggle');
+}
+function mascaraCpf(valor) {
+    return valor.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/g,"\$1.\$2.\$3\-\$4");
 }

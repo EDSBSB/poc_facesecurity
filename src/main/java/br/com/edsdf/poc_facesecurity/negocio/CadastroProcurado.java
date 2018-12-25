@@ -9,11 +9,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.postgresql.util.PGobject;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.multipart.MultipartFile;
+
+import br.com.edsdf.poc_facesecurity.bigboost.ClienteBibBoost;
 
 public class CadastroProcurado {
 
@@ -25,7 +28,7 @@ public class CadastroProcurado {
 	}
 	
 
-	public String cadastro(String nome, String identificador, MultipartFile file) {
+	public String cadastro(String cpf, MultipartFile file) {
 		try {
 			String home = System.getProperty("user.home");
 			String filePath = home + "/" + UPLOADED_FOLDER;
@@ -33,26 +36,67 @@ public class CadastroProcurado {
 				new File(filePath).mkdirs();
 			}
 
-			// Get the file and save it somewhere
 			byte[] bytes = file.getBytes();
-			Path path = Paths.get(filePath + identificador + "_" + file.getOriginalFilename());
+			cpf = cpf.replaceAll("[^0-9]+","");
+			
+
+			ClienteBibBoost cliente =new ClienteBibBoost();
+			
+			String ret = cliente.buscaDadoBasico(cpf);
+			
+			Path path = Paths.get(filePath + cpf + "_" + file.getOriginalFilename());
 			Files.write(path, bytes);
 			
+			JSONObject j = new JSONObject(ret);
+			
+			JSONArray arr = j.getJSONArray("Result");
+			
+			String nome = arr.getJSONObject(0).getJSONObject("BasicData").getString("Name");
+
+			if( jaExisteProcurado(cpf) ) {
+				apagaRegistro("procurado", cpf);
+			}
 			JSONObject json = new JSONObject();
+			json.put("cpf", cpf);
 			json.put("nome", nome);
-			json.put("identificador", identificador );
-			json.put("foto", filePath + identificador + "_" +file.getOriginalFilename() );
+			json.put("foto", filePath + cpf + "_" +file.getOriginalFilename() );
 
 			String sql = "insert into conteiner (tipo, dado) values (?, ?::json)";
 			
 			jdbcTemplate.update(sql, "procurado", json.toString() );
 			
-		} catch (IOException e) {
+
+
+			return ret;
+
+		} catch (Exception e) {
 			e.printStackTrace();
-		} catch (JSONException e) {
-			e.printStackTrace();
+			try {
+				JSONObject j = new JSONObject();
+				j.put("sucess", false);
+				j.put("msg", e.getMessage());
+				return j.toString();
+			} catch (Exception e1) {
+			}
 		}
-		return "sucesso";
+		return "erro";
+	}
+
+
+	private void apagaRegistro(String string, String cpf) {
+		String sql = "delete from conteiner where dado ->> 'cpf' = ? and tipo = ?";
+		
+		jdbcTemplate.update(sql, cpf, "procurado" );
+	}
+
+
+	private boolean jaExisteProcurado(String cpf) {
+		String sql = "select count(*) foto from conteiner where dado ->> 'cpf' = ? and tipo = 'procurado'";
+		
+		int count = jdbcTemplate.queryForObject(
+                sql, new Object[] { cpf }, Integer.class);
+		
+		return count > 0;
 	}
 
 
@@ -70,7 +114,7 @@ public class CadastroProcurado {
 
 
 	public String buscaImagem(String id) {
-		String sql = "select dado ->> 'foto' foto from conteiner where dado ->> 'identificador' = ? ";
+		String sql = "select dado ->> 'foto' foto from conteiner where dado ->> 'cpf' = ? limit 1";
 		
 		return jdbcTemplate.queryForObject(sql, new Object[] {id}, String.class);
 		
